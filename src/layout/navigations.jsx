@@ -3,6 +3,7 @@ import {
   ProjectOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import K from "~/utilities/constants";
 // import K from "~/utilities/constants";
 
 // Template a navigation item
@@ -31,20 +32,25 @@ const navigations = [
   {
     name: "Dashboard",
     path: "/",
+    permission: [
+      K.Permissions.user,
+      K.Permissions.admin,
+      K.Permissions["super-admin"],
+    ],
     icon: <DashboardOutlined />,
   },
   {
     name: "Products",
     // path: "/products",
     icon: <ProjectOutlined />,
-    permission: [],
+    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
     children: productChildren("/products"),
   },
-
   {
     name: "Users",
     // path: "/users",
     icon: <UserOutlined />,
+    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
     children: defaultChildren("/users"),
   },
 ];

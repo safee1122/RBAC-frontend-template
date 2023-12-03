@@ -3,7 +3,12 @@ import CryptoJS from "crypto-js";
 import Cookies from "js-cookie";
 import NetworkCall from "~/network/networkCall";
 import Request from "~/network/request";
-import { saveUserData } from "~/redux/user/userSlice";
+import {
+  addUser,
+  removeUser,
+  saveUserData,
+  saveUsers,
+} from "~/redux/user/userSlice";
 import K from "~/utilities/constants";
 import { redirectToLogin } from "~/utilities/generalUtility";
 
@@ -77,58 +82,36 @@ export default class User {
       false,
     );
 
-    return await NetworkCall.fetch(request, true);
+    return async (dispatch) => {
+      const response = await NetworkCall.fetch(request, true);
+      dispatch(saveUsers(response?.userData));
+      return response;
+    };
   }
 
   static async deleteUser(id) {
+    const params = K.Network.URL.Users.DeleteUser + id;
     const request = new Request(
-      K.Network.URL.Users.DeleteUser + `?id=${id}`,
+      params,
       K.Network.Method.DELETE,
+      null,
+      null,
       K.Network.Header.Type.Json,
-      {},
       false,
     );
 
-    return NetworkCall.fetch(request, true);
-  }
-  //Update Profile Data
-  static async updateProfileData(body, remember) {
-    const request = new Request(
-      K.Network.URL.Users.UpdateProfileData,
-      K.Network.Method.PUT,
-      body,
-      K.Network.Header.Type.Json,
-      {},
-      false,
-    );
-
-    const user = await NetworkCall.fetch(request, true);
-    const data = this.getUserObjectFromCookies();
-    user.roles = data.user.roles;
-    const cookieData = {
-      token: data?.token,
-      user,
+    return async (dispatch) => {
+      const response = await NetworkCall.fetch(request, true);
+      console.log({ response });
+      dispatch(removeUser(response?.user));
+      return response;
     };
-    let encryptedUser = CryptoJS.AES.encrypt(
-      JSON.stringify(cookieData),
-      K.Cookie.Key.EncryptionKey,
-    );
-    Cookies.set(K.Cookie.Key.User, encryptedUser, {
-      path: "/",
-      domain: K.Network.URL.Client.BaseHost,
-      expires: remember ? 365 : "",
-    });
-
-    return user;
   }
   // Invite User
-  static async inviteUser(email, roleId) {
-    const body = {
-      email,
-      roleId,
-    };
+  static async create(body) {
+    console.log({ body });
     const request = new Request(
-      K.Network.URL.Users.InviteUser,
+      K.Network.URL.Users.Create,
       K.Network.Method.POST,
       body,
       K.Network.Header.Type.Json,
@@ -136,7 +119,12 @@ export default class User {
       false,
     );
 
-    return NetworkCall.fetch(request, true);
+    return async (dispatch) => {
+      const response = await NetworkCall.fetch(request, true);
+      console.log({ response });
+      dispatch(addUser(response?.data));
+      return response;
+    };
   }
   // get all Roles
   static async getUserRoles() {
@@ -150,65 +138,6 @@ export default class User {
     );
 
     return NetworkCall.fetch(request, true);
-  }
-
-  // Upload Profile Picture
-  static async uploadProfilePicture(body, remember) {
-    const request = new Request(
-      K.Network.URL.Users.UploadProfilePicture,
-      K.Network.Method.POST,
-      body,
-      K.Network.Header.Type.File,
-      {},
-      false,
-    );
-    const result = await NetworkCall.fetch(request, true);
-    let data = this.getUserObjectFromCookies();
-    data.user.profileImageUrl = result.path;
-    const cookieData = {
-      token: data?.token,
-      user: data.user,
-    };
-    let encryptedUser = CryptoJS.AES.encrypt(
-      JSON.stringify(cookieData),
-      K.Cookie.Key.EncryptionKey,
-    );
-    Cookies.set(K.Cookie.Key.User, encryptedUser, {
-      path: "/",
-      domain: K.Network.URL.Client.BaseHost,
-      expires: remember ? 365 : "",
-    });
-    return result;
-  }
-
-  //Delete Profile Picture
-
-  static async deleteProfilePicture(remember) {
-    const request = new Request(
-      K.Network.URL.Users.DeleteProfilePicture,
-      K.Network.Method.DELETE,
-      K.Network.Header.Type.File,
-      {},
-      false,
-    );
-
-    const result = await NetworkCall.fetch(request, true);
-    let data = this.getUserObjectFromCookies();
-    data.user.profileImageUrl = result.path;
-    const cookieData = {
-      token: data?.token,
-      user: data.user,
-    };
-    let encryptedUser = CryptoJS.AES.encrypt(
-      JSON.stringify(cookieData),
-      K.Cookie.Key.EncryptionKey,
-    );
-    Cookies.set(K.Cookie.Key.User, encryptedUser, {
-      path: "/",
-      domain: K.Network.URL.Client.BaseHost,
-      expires: remember ? 365 : "",
-    });
-    return result;
   }
 
   // * Helpers
@@ -239,8 +168,8 @@ export default class User {
   }
 
   static getFullName() {
-    const { firstName, lastName } = this.getUserObjectFromCookies().user;
-    return firstName?.concat(" ", lastName) ?? "";
+    const { firstname, lastname } = this.getUserObjectFromCookies().user;
+    return firstname?.concat(" ", lastname) ?? "";
   }
 
   static getEmail() {

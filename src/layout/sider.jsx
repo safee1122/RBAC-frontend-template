@@ -1,7 +1,8 @@
 import { Layout, Menu } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import navigations from "./navigations";
+import User from "~/models/user";
 
 export default function Sider({ collapsed, setCollapsed }) {
   const { Sider } = Layout;
@@ -9,6 +10,9 @@ export default function Sider({ collapsed, setCollapsed }) {
 
   const [collapsedWidth, setCollapsedWidth] = useState(80);
   const [openKeys, setOpenKeys] = useState([location.pathname.split("/")[1]]);
+  const [updatedNavigations, setUpdatedNavigations] = useState([
+    location.pathname.split("/")[1],
+  ]);
 
   const onOpenChange = (keys) => {
     setOpenKeys([...keys]);
@@ -24,7 +28,12 @@ export default function Sider({ collapsed, setCollapsed }) {
       setCollapsedWidth(80);
     }
   };
-
+  useEffect(() => {
+    const updatedNavs = navigations?.filter((nav) =>
+      nav.permission.includes(User.getRole()),
+    );
+    setUpdatedNavigations(updatedNavs);
+  }, []);
   return (
     <Sider
       breakpoint="md"
@@ -50,7 +59,7 @@ export default function Sider({ collapsed, setCollapsed }) {
         openKeys={openKeys}
         onOpenChange={onOpenChange}
         selectedKeys={[location.pathname]}
-        items={navigations.map((navigation) => {
+        items={updatedNavigations?.map((navigation) => {
           if ((navigation.children?.length ?? 0) > 0) {
             const subMenuKey = navigation.children[0].path.split("/")[1];
             return {

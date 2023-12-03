@@ -24,11 +24,9 @@ const K = {
         Login: "/admin/auth/login",
       },
       Users: {
-        GetUser: "/user/get-all",
-        LoggedInUserDetails: "/user/me",
-        UpdateProfileData: "/user/update-profile",
-        DeleteUser: "/user/delete-user",
-        InviteUser: "/user/invite-user",
+        GetUser: "/admin/user",
+        DeleteUser: "/admin/user/delete/",
+        Create: "/admin/user/create",
         UploadProfilePicture: "user/upload-picture",
         DeleteProfilePicture: "user/profile-picture",
       },
@@ -42,7 +40,7 @@ const K = {
         DeleteProducts: "/product",
       },
 
-      Roles: "/roles",
+      Roles: "/admin/auth/roles",
       Permission: "/permissions",
     },
     Method: {
