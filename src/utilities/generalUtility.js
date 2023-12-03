@@ -40,10 +40,8 @@ export const isDecimalRegex = () => {
 export const isPermissionPresent = (permission, permissionHash) => {
   // const hash = new Map(permissionHash);
   // * Uncomment above code if permissionHash not stored as instance of Map.
-  if (permission) {
-    return (
-      permissionHash.has(K.Permissions.Admin) || permissionHash.has(permission)
-    );
+  if (permission.length > 0) {
+    return permission?.includes(permissionHash);
   }
   return true;
 };

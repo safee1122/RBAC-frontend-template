@@ -7,7 +7,7 @@ import Unauthorized from "~/features/unauthorized/unauthorized";
 import CreateUser from "~/features/users/createUser";
 import GuestPageLayout from "~/layout/guestPageLayout";
 import LoggedInPageLayout from "~/layout/loggedInPageLayout";
-// import K from "~/utilities/constants";
+import K from "~/utilities/constants";
 
 const Users = lazy(() => import("~/features/users/users"));
 const ProductTable = lazy(() => import("~/features/products/productTable"));
@@ -31,49 +31,53 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+    permission: [],
     layout: GuestPageLayout,
   },
   {
     path: "/users",
     name: "Users",
     component: Users,
-    authenticated: false,
-    // permission: K.Permissions.ReadUser,
+    authenticated: true,
+    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
     layout: LoggedInPageLayout,
   },
   {
     path: "/users/create",
     name: "Create",
     component: CreateUser,
-    authenticated: false,
-    // permission: K.Permissions.Admin,
+    authenticated: true,
+    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
     layout: LoggedInPageLayout,
   },
   {
     path: "/",
     name: "Dashboard",
     component: Dashboard,
+    authenticated: true,
+    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
+    layout: LoggedInPageLayout,
+  },
+  {
+    path: "/products/product-list",
+    name: "ProductTable",
     authenticated: false,
+    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
+    component: ProductTable,
     layout: LoggedInPageLayout,
   },
   {
     path: "/unauthorized",
     name: "Unauthorized",
     component: Unauthorized,
+    permission: [],
     authenticated: false,
     layout: GuestPageLayout,
   },
   {
-    path: "/products/product-list",
-    name: "ProductTable",
-    authenticated: false,
-    // permission: K.Permissions.ReadProducts,
-    component: ProductTable,
-    layout: LoggedInPageLayout,
-  },
-  {
     path: "*",
     name: "Not Found",
+    permission: [],
     component: NotFound,
     layout: GuestPageLayout,
   },

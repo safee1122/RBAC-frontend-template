@@ -248,7 +248,7 @@ export default class User {
   }
 
   static getRole() {
-    return this.getUserObjectFromCookies()?.user?.roles ?? null;
+    return this.getUserObjectFromCookies()?.user?.userRole?.name ?? null;
   }
   static getTenant() {
     return this.getUserObjectFromCookies().tenant?.domainPrefix ?? "";
