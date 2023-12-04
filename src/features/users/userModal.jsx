@@ -61,6 +61,10 @@ const UserModal = ({ editId, isModalOpen, handleCancel, form, onFinish }) => {
               required: true,
               message: "Please enter passsword",
             },
+            {
+              min: 5,
+              message: "Password must be at least 5 characters",
+            },
           ]}
         >
           <Input type="password" placeholder="Password" size="large" />
