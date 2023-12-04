@@ -35,14 +35,14 @@ const Users = () => {
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <a
+          {/* <a
             onClick={() => {
               // setProductId(record?._id);
               handleButtonEdit(record);
             }}
           >
             Edit {record.name}
-          </a>
+          </a> */}
           <a onClick={() => handleButtonDelete(record?._id)}>Delete</a>
         </Space>
       ),
