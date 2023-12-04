@@ -1,46 +1,90 @@
-import { Button, Form, Input, Modal, Select } from "antd";
+import { Form, Input, Modal, Select } from "antd";
+import { useEffect, useState } from "react";
+import User from "~/models/user";
 
-const UserModal = ({ isModalOpen, handleCancel, form, onFinish, roles }) => {
+const UserModal = ({ editId, isModalOpen, handleCancel, form, onFinish }) => {
+  const [roles, setRoles] = useState([]);
+  const fetchRoles = async () => {
+    const res = await User.getUserRoles();
+    setRoles(res?.roles);
+  };
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
   return (
-    <>
-      <Modal
-        title="Create User"
-        open={isModalOpen}
-        onOk={form.submit}
-        onCancel={handleCancel}
-        footer={false}
-      >
-        <Form form={form} onFinish={onFinish}>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ required: true, message: "Please input the email!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Role"
-            name="roleId"
-            rules={[{ required: true, message: "Please select a role!" }]}
-          >
-            <Select placeholder="Select a role">
-              {roles.map((role) => (
-                <Select.Option key={role.id} value={role.id}>
-                  {role.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item className="mb-0">
-            <Button block size="large" type="primary" htmlType="submit">
-              Send Invitation
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </>
+    <Modal
+      title="Enter Product Details"
+      okText={editId.current ? "Update" : "Save"}
+      open={isModalOpen}
+      onOk={form.submit}
+      onCancel={handleCancel}
+    >
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form.Item
+          name="firstname"
+          rules={[
+            {
+              required: true,
+              message: "Please enter user name",
+            },
+          ]}
+        >
+          <Input type="text" placeholder="First Name" size="large" />
+        </Form.Item>
+        <Form.Item
+          name="lastname"
+          rules={[
+            {
+              required: true,
+              message: "Please enter user last name",
+            },
+          ]}
+        >
+          <Input type="text" placeholder="Last Name" size="large" />
+        </Form.Item>
+        <Form.Item
+          name="email"
+          rules={[
+            {
+              required: true,
+              message: "Please enter user email",
+            },
+          ]}
+        >
+          <Input type="email" placeholder="Email" size="large" />
+        </Form.Item>
+        <Form.Item
+          name="password"
+          rules={[
+            {
+              required: true,
+              message: "Please enter passsword",
+            },
+          ]}
+        >
+          <Input type="password" placeholder="Password" size="large" />
+        </Form.Item>
+        <Form.Item
+          name="userRole"
+          rules={[
+            {
+              required: true,
+              message: "Please enter passsword",
+            },
+          ]}
+        >
+          <Select
+            mode="text"
+            style={{
+              width: "100%",
+            }}
+            placeholder="Role"
+            options={roles}
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 

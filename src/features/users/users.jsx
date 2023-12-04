@@ -1,183 +1,119 @@
-import { Button, Card, Form, Input, Modal, Table, message } from "antd";
-import { debounce } from "lodash";
+import { Button, Card, Form, Space, Table, message } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import Spinner from "~/common/spinner/spinner";
-import User from "~/models/user";
-import { selectUser } from "~/redux/user/userSlice";
-import K from "~/utilities/constants";
-import {
-  isPermissionPresent,
-  numberSorting,
-  setFieldErrorsFromServer,
-  stringSorting,
-} from "~/utilities/generalUtility";
+import { useDispatch, useSelector } from "react-redux";
 import UserModal from "./userModal";
+import User from "~/models/user";
+import { allUsers } from "~/redux/user/userSlice";
 
-export default function Users() {
-  const [searchedText, setSearchedText] = useState("");
-  const [userData, setUserData] = useState([]);
-  const editId = useRef(null);
+const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshTable, setRefreshTable] = useState(false);
   const [form] = Form.useForm();
-  const [roles, setRoles] = useState([]);
-  const userDataUpdate = useSelector(selectUser);
-  const getUserRolesData = async (values) => {
-    try {
-      const response = await User.getUserRoles(values);
-      setRoles(response);
-    } catch (error) {
-      setFieldErrorsFromServer(error);
-    }
-  };
-
-  const getAllUsers = async () => {
-    try {
-      const response = await User.getAll();
-      setUserData(response.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const onSearch = (param) => {
-    let value = undefined;
-    if (param.target) value = param.target.value;
-    else value = param;
-    setSearchedText(value ? value : "");
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const showModal = () => {
-    if (!editId.current) form.resetFields();
-    setIsModalOpen(true);
-  };
-
-  const onFinish = async (values) => {
-    try {
-      await User.inviteUser(values.email, values.roleId);
-      message.success(`An email has been sent to ${values.email}`);
-      setIsModalOpen(false);
-    } catch (error) {
-      setFieldErrorsFromServer(error);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this product?",
-      content: "This operation cannot be undone.",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          await User.deleteUser(id);
-          getAllUsers();
-        } catch (error) {
-          setFieldErrorsFromServer(error);
-        }
-      },
-      onCancel() {
-        console.log("Cancel");
-      },
-    });
-  };
-
+  const editId = useRef(null);
+  const dispatch = useDispatch();
+  // const [productId, setProductId] = useState(null);
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      sorter: (a, b) => numberSorting(a, b, "id"),
+      title: "FirstName",
+      dataIndex: "firstname",
+      key: "firstname",
+      render: (text) => <a>{text}</a>,
     },
     {
-      title: "First Name",
-      dataIndex: "firstName",
-      filteredValue: [searchedText],
-      onFilter: (value, record) => {
-        return (
-          [record.id, record.age].includes(+value) ||
-          record.firstName?.toLowerCase().includes(value.toLowerCase()) ||
-          record.lastName?.toLowerCase().includes(value.toLowerCase()) ||
-          record.email?.toLowerCase().includes(value.toLowerCase()) ||
-          record.address?.toLowerCase().includes(value.toLowerCase())
-        );
-      },
-      key: "name",
-      sorter: (a, b) => stringSorting(a, b, "firstName"),
-    },
-    {
-      title: "Last Name",
-      dataIndex: "lastName",
-      key: "lastName",
-      sorter: (a, b) => stringSorting(a, b, "lastName"),
+      title: "LastName",
+      dataIndex: "lastname",
+      key: "lastname",
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
-      sorter: (a, b) => stringSorting(a, b, "email"),
     },
-    {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
-      sorter: (a, b) => numberSorting(a, b, "age"),
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-      sorter: (a, b) => stringSorting(a, b, "address"),
-    },
-    {
-      title: "Status",
-      key: "status",
-      dataIndex: "status",
-    },
+
     {
       title: "Action",
       key: "action",
-      hidden: !isPermissionPresent(
-        K.Permissions.WriteProducts,
-        userDataUpdate.userRole?.permissions,
-      ),
-      render: (_, data) => (
-        <Button danger size="small" onClick={() => handleDelete(data.id)}>
-          Delete
-        </Button>
+      render: (_, record) => (
+        <Space size="middle">
+          <a
+            onClick={() => {
+              // setProductId(record?._id);
+              handleButtonEdit(record);
+            }}
+          >
+            Edit {record.name}
+          </a>
+          <a onClick={() => handleButtonDelete(record?._id)}>Delete</a>
+        </Space>
       ),
     },
-  ].filter((column) => {
-    return !column.hidden;
-  });
+  ];
+  const data = useSelector(allUsers);
 
+  const fetchProducts = async () => {
+    try {
+      dispatch(await User.getAll());
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
   useEffect(() => {
-    getAllUsers();
-    getUserRolesData();
+    fetchProducts();
   }, []);
 
-  if (roles.length == 0) {
-    return <Spinner />;
-  }
+  const createUser = async (values) => {
+    try {
+      await dispatch(await User.create(values));
+      setIsModalOpen(false);
+      setRefreshTable(!refreshTable);
+      message.success("User created Successfully");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const showModal = () => {
+    if (!editId.current) {
+      form.resetFields();
+    }
+    setIsModalOpen(true);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+  const onFinish = async (values) => {
+    if (!editId.current) {
+      createUser(values);
+    } else {
+      handleButtonEdit(values);
+    }
+    form.resetFields();
+  };
+
+  const handleButtonDelete = async (id) => {
+    try {
+      await dispatch(await User.deleteUser(id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleButtonEdit = async () => {
+    try {
+      // await Product.update(productId, values);
+      message.success("Product updated successfully");
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <Card
         className="card-wrapper"
-        title={
-          <Input
-            allowClear
-            placeholder="Search"
-            onChange={debounce(onSearch, 500)}
-          />
-        }
         extra={
           <Button
             type="primary"
+            size="large"
             onClick={() => {
               editId.current = false;
               showModal();
@@ -187,7 +123,9 @@ export default function Users() {
           </Button>
         }
       >
-        <Table rowKey="id" bordered columns={columns} dataSource={userData} />
+        <div className="ag-theme-alpine" style={{ height: 600, maxwidth: 100 }}>
+          {data && <Table columns={columns} dataSource={data} />}
+        </div>
       </Card>
       <UserModal
         isModalOpen={isModalOpen}
@@ -195,8 +133,9 @@ export default function Users() {
         form={form}
         onFinish={onFinish}
         editId={editId}
-        roles={roles}
       />
     </>
   );
-}
+};
+
+export default Users;

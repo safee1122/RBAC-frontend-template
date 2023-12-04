@@ -4,7 +4,6 @@ import Login from "~/features/login/login";
 import NotFound from "~/features/notFound/notFound";
 // import ProductTable from "~/features/products/productTable";
 import Unauthorized from "~/features/unauthorized/unauthorized";
-import CreateUser from "~/features/users/createUser";
 import GuestPageLayout from "~/layout/guestPageLayout";
 import LoggedInPageLayout from "~/layout/loggedInPageLayout";
 import K from "~/utilities/constants";
@@ -42,20 +41,17 @@ const routes = [
     permission: [K.Permissions.admin, K.Permissions["super-admin"]],
     layout: LoggedInPageLayout,
   },
-  {
-    path: "/users/create",
-    name: "Create",
-    component: CreateUser,
-    authenticated: true,
-    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
-    layout: LoggedInPageLayout,
-  },
+
   {
     path: "/",
     name: "Dashboard",
     component: Dashboard,
     authenticated: true,
-    permission: [K.Permissions.admin, K.Permissions["super-admin"]],
+    permission: [
+      K.Permissions.user,
+      K.Permissions.admin,
+      K.Permissions["super-admin"],
+    ],
     layout: LoggedInPageLayout,
   },
   {
