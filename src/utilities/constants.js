@@ -24,7 +24,7 @@ const K = {
         Login: "/admin/auth/login",
       },
       Users: {
-        GetUser: "/user/get-all",
+        GetUser: "/user",
         LoggedInUserDetails: "/user/me",
         UpdateProfileData: "/user/update-profile",
         DeleteUser: "/user/delete-user",
@@ -37,9 +37,9 @@ const K = {
         GetAll: "/admin/product",
         GetProducts: "/product/get",
         GetProductsById: "/product",
-        CreateProducts: "/product",
-        UpdateProducts: "/product",
-        DeleteProducts: "/product",
+        CreateProducts: "/admin/product/create",
+        UpdateProducts: "/admin/product/update",
+        DeleteProducts: "/admin/product",
       },
 
       Roles: "/roles",

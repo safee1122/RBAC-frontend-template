@@ -16,7 +16,9 @@ const ProductTable = () => {
     {
       title: "Name",
       dataIndex: "name",
+      width: 200,
       key: "name",
+      fixed: "left",
       render: (text) => <a>{text}</a>,
     },
     {
@@ -25,23 +27,16 @@ const ProductTable = () => {
       key: "description",
     },
     {
-      title: "Image",
-      dataIndex: "image",
-      key: "image",
-    },
-
-    {
       title: "Action",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
           <a
             onClick={() => {
-              // setProductId(record?._id);
               handleButtonEdit(record);
             }}
           >
-            Edit {record.name}
+            Edit
           </a>
           <a onClick={() => handleButtonDelete(record?._id)}>Delete</a>
         </Space>
@@ -63,7 +58,7 @@ const ProductTable = () => {
 
   const createProducts = async (values) => {
     try {
-      await Product.create(values);
+      dispatch(await Product.create(values));
       setIsModalOpen(false);
       setRefreshTable(!refreshTable);
       message.success("Product created Successfully");
@@ -84,23 +79,29 @@ const ProductTable = () => {
     if (!editId.current) {
       createProducts(values);
     } else {
-      handleButtonEdit(values);
+      values._id = editId.current;
+      dispatch(await Product.update(values));
+      setIsModalOpen(false);
     }
     form.resetFields();
   };
 
-  const handleButtonDelete = async () => {
+  const handleButtonDelete = async (id) => {
     try {
-      // await Product.delete(id);
+      dispatch(await Product.delete(id));
     } catch (error) {
       console.error(error);
     }
   };
-  const handleButtonEdit = async () => {
+  const handleButtonEdit = async (product) => {
     try {
-      // await Product.update(productId, values);
-      message.success("Product updated successfully");
-      setIsModalOpen(false);
+      editId.current = product._id;
+      setIsModalOpen(true);
+      form.setFieldsValue({
+        name: product.name,
+        description: product.description,
+        image: product.image,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -123,8 +124,13 @@ const ProductTable = () => {
           </Button>
         }
       >
-        <div className="ag-theme-alpine" style={{ height: 600, maxwidth: 100 }}>
-          {data && <Table columns={columns} dataSource={data} />}
+        <div
+          className="ag-theme-alpine"
+          style={{ height: 600, maxwidth: 100, overflow: "auto" }}
+        >
+          {data && (
+            <Table columns={columns} dataSource={data} pagination={false} />
+          )}
         </div>
       </Card>
       <ProductModal

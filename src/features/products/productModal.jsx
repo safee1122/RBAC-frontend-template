@@ -1,4 +1,4 @@
-import { Form, Input, InputNumber, Modal } from "antd";
+import { Form, Input, Modal } from "antd";
 
 const ProductModal = ({
   editId,
@@ -20,7 +20,7 @@ const ProductModal = ({
           name="name"
           rules={[
             {
-              required: true,
+              required: editId.current ? false : true,
               message: "Please enter product name",
             },
           ]}
@@ -28,26 +28,26 @@ const ProductModal = ({
           <Input type="text" placeholder="Name" size="large" />
         </Form.Item>
         <Form.Item
-          name="quantity"
+          name="image"
           rules={[
             {
-              required: true,
-              message: "Please enter Quantity",
+              required: editId.current ? false : true,
+              message: "Please enter image url",
             },
           ]}
         >
-          <InputNumber className="w-100" placeholder="Quantity" size="large" />
+          <Input className="w-100" placeholder="image" size="large" />
         </Form.Item>
         <Form.Item
-          name="price"
+          name="description"
           rules={[
             {
-              required: true,
-              message: "Please enter price",
+              required: editId.current ? false : true,
+              message: "Please enter description",
             },
           ]}
         >
-          <InputNumber className="w-100" placeholder="Price" size="large" />
+          <Input className="w-100" placeholder="description" size="large" />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,6 +1,11 @@
 import NetworkCall from "~/network/networkCall";
 import Request from "~/network/request";
-import { saveAllProducts } from "~/redux/product/productsSlice";
+import {
+  addProduct,
+  deleteProduct,
+  saveAllProducts,
+  updateProduct,
+} from "~/redux/product/productsSlice";
 import K from "~/utilities/constants";
 
 export default class Product {
@@ -42,19 +47,33 @@ export default class Product {
       {},
       false,
     );
-    return await NetworkCall.fetch(request, true);
+    return async (dispatch) => {
+      try {
+        const response = await NetworkCall.fetch(request, true);
+        dispatch(addProduct(response.data));
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
   }
 
-  static async update(id, body) {
+  static async update(body) {
     const request = new Request(
-      K.Network.URL.Products.UpdateProducts + `/${id}`,
-      K.Network.Method.PATCH,
+      K.Network.URL.Products.UpdateProducts,
+      K.Network.Method.POST,
       body,
+      null,
       K.Network.Header.Type.Json,
-      {},
       false,
     );
-    return await NetworkCall.fetch(request, true);
+    return async (dispatch) => {
+      try {
+        await NetworkCall.fetch(request, true);
+        dispatch(updateProduct(body));
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
   }
 
   static async delete(id) {
@@ -62,11 +81,19 @@ export default class Product {
     const request = new Request(
       params,
       K.Network.Method.DELETE,
+      null,
+      null,
       K.Network.Header.Type.Json,
-      {},
       false,
     );
-    return await NetworkCall.fetch(request, true);
+    return async (dispatch) => {
+      try {
+        const response = await NetworkCall.fetch(request, true);
+        dispatch(deleteProduct(response.product._id));
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
   }
 
   // Export Csv File
